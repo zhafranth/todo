@@ -1,5 +1,6 @@
 "use client";
 
+import { createTodo } from "@/lib/actions";
 import {
   Button,
   Input,
@@ -36,7 +37,20 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
     []
   );
 
-  const handleSubmit = useCallback(() => {}, []);
+  const handleSubmit = useCallback(async () => {
+    try {
+      const res = await createTodo(payload);
+      if (res.status === 200) {
+        setPayload({
+          deskripsi: "",
+          judul: "",
+        });
+        toggleModal();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }, [payload, toggleModal]);
 
   return (
     <>
