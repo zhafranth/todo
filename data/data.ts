@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/prisma";
 
-export const getToDoList = async () => {
+export const getProductList = async () => {
   try {
-    const toDoList = await prisma.todo.findMany();
-    return toDoList;
+    const products = await prisma.product.findMany();
+    return products;
   } catch (error) {
     throw new Error("Failed to fetch contact data");
   }

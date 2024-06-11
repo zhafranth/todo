@@ -1,6 +1,5 @@
 "use client";
 
-import { createTodo } from "@/lib/actions";
 import {
   Button,
   Input,
@@ -11,14 +10,20 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import React, { useCallback, useState } from "react";
+import { createProduct } from "@/lib/actions";
 import { FaPlus } from "react-icons/fa";
+import ImportButton from "./ImportButton";
+
+const DEFAULT_VALUE: {
+  name: string;
+  price: string;
+  description: string;
+  cover?: File | null;
+} = { name: "", price: "", description: "", cover: null };
 
 const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
   const [isShow, setIsShow] = useState(false);
-  const [payload, setPayload] = useState({
-    judul: "",
-    deskripsi: "",
-  });
+  const [payload, setPayload] = useState(DEFAULT_VALUE);
 
   const toggleModal = useCallback(
     () => setIsShow((prevState) => !prevState),
@@ -27,7 +32,7 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
 
   const handleChange = useCallback(
     (
-      key: "judul" | "deskripsi",
+      key: "name" | "price" | "description",
       event: React.ChangeEvent<HTMLInputElement>
     ) => {
       event.preventDefault();
@@ -37,19 +42,44 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
     []
   );
 
+  const handleChangeFile = useCallback((value: File | null) => {
+    setPayload((prevState) => ({ ...prevState, cover: value }));
+  }, []);
+
   const handleSubmit = useCallback(async () => {
     try {
-      const res = await createTodo(payload);
-      if (res.status === 200) {
-        setPayload({
-          deskripsi: "",
-          judul: "",
-        });
-        toggleModal();
-      }
+      const data = new FormData();
+      data.set("cover", payload.cover as File);
+      data.set("name", payload.name);
+      data.set("price", payload.price);
+      data.set("description", payload.description);
+
+      const response = await createProduct(data);
+      toggleModal();
+      setPayload(DEFAULT_VALUE);
     } catch (error) {
       console.log(error);
     }
+    // try {
+    //   const data = new FormData();
+    //   data.set("cover", payload.cover as File);
+    //   data.set("name", payload.name);
+    //   data.set("price", payload.price);
+    //   data.set("description", payload.description);
+
+    //   const res = await fetch("/api/upload", {
+    //     method: "POST",
+    //     body: data,
+    //   });
+
+    //   if (!res.ok) throw new Error(await res.text());
+    //   if (res.ok) {
+    //     toggleModal();
+    //     setPayload(DEFAULT_VALUE);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }, [payload, toggleModal]);
 
   return (
@@ -60,28 +90,35 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
         onClick={toggleModal}
       >
         <FaPlus />
-        To Do
+        Product
       </Button>
       <Modal isOpen={isShow} onOpenChange={toggleModal}>
         <ModalContent>
           {(onClose) => (
             <>
               <ModalHeader className="flex flex-col gap-1 capitalize">
-                {type} To Do
+                {type} Product
               </ModalHeader>
               <ModalBody>
                 <Input
-                  onChange={(e) => handleChange("judul", e)}
-                  value={payload.judul}
+                  onChange={(e) => handleChange("name", e)}
+                  value={payload.name}
                   type="text"
-                  label="Judul"
+                  label="Name"
                 />
                 <Input
-                  onChange={(e) => handleChange("deskripsi", e)}
-                  value={payload.deskripsi}
+                  onChange={(e) => handleChange("price", e)}
+                  value={payload.price}
                   type="text"
-                  label="Deskripsi"
+                  label="Price"
                 />
+                <Input
+                  onChange={(e) => handleChange("description", e)}
+                  value={payload.description}
+                  type="text"
+                  label="Description"
+                />
+                <ImportButton onChange={handleChangeFile} />
               </ModalBody>
               <ModalFooter>
                 <Button color="danger" variant="light" onPress={onClose}>
