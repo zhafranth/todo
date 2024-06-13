@@ -2,7 +2,7 @@
 
 import mime from "mime";
 import { join } from "path";
-import { stat, mkdir, writeFile } from "fs/promises";
+import { stat, mkdir, writeFile, rm } from "fs/promises";
 import _ from "lodash";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
@@ -131,8 +131,25 @@ export const createProduct = async (formData: FormData) => {
   // }
 };
 
+const deleteFile = async (id: string) => {
+  const product = await prisma.product.findUnique({
+    where: { id },
+  });
+  const { cover } = product || {};
+
+  const filePath = join(process.cwd(), "public", cover as string);
+  console.log("filePath:", filePath);
+
+  try {
+    await rm(filePath as string);
+  } catch (e) {
+    console.log("Error remove file", e);
+  }
+};
+
 export const deleteProduct = async (id: string) => {
   try {
+    await deleteFile(id);
     await prisma.product.delete({
       where: {
         id,

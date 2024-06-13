@@ -1,34 +1,16 @@
-// "use client";
-
-// import { useCallback, useEffect, useState } from "react";
-import ActionTodo from "./components/ActionTodo";
-import Table from "./components/Table";
-import { getProductList } from "@/data/data";
+import ActionFooter from "./components/ActionFooter";
+import Card from "./components/Card";
 
 const Home = async () => {
-  const products = await getProductList();
-  // const [products, setProducts] = useState([]);
-
-  // const fetchData = useCallback(async () => {
-  //   try {
-  //     const response = await fetch("/api/products", {
-  //       method: "GET",
-  //     });
-  //     const { data: list = [] } = await response.json();
-  //     setProducts(list);
-  //   } catch (error) {
-  //     console.log("error:", error);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   fetchData();
-  // }, [fetchData]);
-
+  const data = [1, 2, 3, 4, 5];
   return (
-    <div className="h-screen px-24 py-16">
-      <ActionTodo type="add" />
-      <Table data={products} />
+    <div className="container min-h-screen bg-[#131315]">
+      <div className="flex justify-center items-center py-8 flex-col gap-y-8 relative">
+        {data.map((item) => (
+          <Card key={item} />
+        ))}
+        <ActionFooter />
+      </div>
     </div>
   );
 };

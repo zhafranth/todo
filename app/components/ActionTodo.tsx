@@ -11,8 +11,9 @@ import {
 } from "@nextui-org/react";
 import React, { useCallback, useState } from "react";
 import { createProduct } from "@/lib/actions";
-import { FaPlus } from "react-icons/fa";
+import { FaHome, FaPlus } from "react-icons/fa";
 import ImportButton from "./ImportButton";
+import { useRouter } from "next/navigation";
 
 const DEFAULT_VALUE: {
   name: string;
@@ -24,6 +25,7 @@ const DEFAULT_VALUE: {
 const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
   const [isShow, setIsShow] = useState(false);
   const [payload, setPayload] = useState(DEFAULT_VALUE);
+  const router = useRouter();
 
   const toggleModal = useCallback(
     () => setIsShow((prevState) => !prevState),
@@ -60,38 +62,27 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
     } catch (error) {
       console.log(error);
     }
-    // try {
-    //   const data = new FormData();
-    //   data.set("cover", payload.cover as File);
-    //   data.set("name", payload.name);
-    //   data.set("price", payload.price);
-    //   data.set("description", payload.description);
-
-    //   const res = await fetch("/api/upload", {
-    //     method: "POST",
-    //     body: data,
-    //   });
-
-    //   if (!res.ok) throw new Error(await res.text());
-    //   if (res.ok) {
-    //     toggleModal();
-    //     setPayload(DEFAULT_VALUE);
-    //   }
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }, [payload, toggleModal]);
 
   return (
     <>
-      <Button
-        className="flex items-center gap-x-2"
-        color="primary"
-        onClick={toggleModal}
-      >
-        <FaPlus />
-        Product
-      </Button>
+      <div className="flex gap-x-2 items-center">
+        <Button
+          isIconOnly
+          className="bg-blue-200 text-blue-600"
+          onPress={() => router.push("/")}
+        >
+          <FaHome />
+        </Button>
+        <Button
+          className="flex items-center gap-x-2"
+          color="primary"
+          onClick={toggleModal}
+        >
+          <FaPlus />
+          Product
+        </Button>
+      </div>
       <Modal isOpen={isShow} onOpenChange={toggleModal}>
         <ModalContent>
           {(onClose) => (

@@ -16,6 +16,15 @@ const config: Config = {
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
+    container: {
+      center: true,
+      padding: "0",
+      screens: {
+        lg: "480px",
+        xl: "480px",
+        "2xl": "480px",
+      },
+    },
   },
   plugins: [nextui()],
 };
