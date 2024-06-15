@@ -138,7 +138,6 @@ const deleteFile = async (id: string) => {
   const { cover } = product || {};
 
   const filePath = join(process.cwd(), "public", cover as string);
-  console.log("filePath:", filePath);
 
   try {
     await rm(filePath as string);

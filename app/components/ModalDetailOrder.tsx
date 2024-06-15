@@ -11,6 +11,8 @@ import {
   ModalHeader,
 } from "@nextui-org/react";
 import React, { useCallback, useState } from "react";
+import useFormPayload from "./hooks/useFormState";
+import { formatCurrencyIDR } from "@/utils/formatCurrency";
 
 interface ModalDetailOrderProps {
   visible: boolean;
@@ -21,8 +23,9 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
   visible,
   toggle,
 }) => {
+  const { userProducts } = useFormPayload();
   return (
-    <Modal isOpen={visible} onOpenChange={toggle} size="sm">
+    <Modal isOpen={visible} onOpenChange={toggle} size="sm" placement="center">
       <ModalContent>
         {(onClose) => (
           <>
@@ -33,8 +36,20 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
               <Input label="Nama" />
               <Input label="No. Telepon" />
               <Divider className="my-5" />
-              <h2 className="text-sm">Total Harga</h2>
-              <p className="font-semibold">Playstation 5 : Rp.5000</p>
+              <div className="flex justify-between">
+                <h2 className="text-sm">Detail Pesanan</h2>
+                <h2 className="text-sm">Harga</h2>
+              </div>
+              {userProducts?.map(({ data: { name, price }, total }, index) => (
+                <div className="flex justify-between" key={index}>
+                  <p>
+                    {name}: {formatCurrencyIDR(price)} x {total}{" "}
+                  </p>
+                  <p className="font-semibold">
+                    {formatCurrencyIDR(price * total)}
+                  </p>
+                </div>
+              ))}
             </ModalBody>
             <ModalFooter>
               <Button color="danger" variant="light" onPress={onClose}>
