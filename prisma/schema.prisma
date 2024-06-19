@@ -15,4 +15,33 @@ model Product {
   cover         String     @db.Text
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
+
+  orderItems    OrderItem[]
+  
+  @@map("products")
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  name          String      @db.Text
+  telp          String      @db.Text
+  totalPrice    Int         @db.Int
+  status        Int         @db.Int
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  orders        OrderItem[]
+
+  @@map("orders") 
+}
+
+model OrderItem {
+  id       String  @id @default(uuid())
+  data     Product? @relation(fields: [productId], references: [id])
+  total    Int
+  orderId  String?
+  productId String?
+  
+  Order    Order?  @relation(fields: [orderId], references: [id])
+
+  @@map("order_items")
 }

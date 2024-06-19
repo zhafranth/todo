@@ -15,6 +15,7 @@ interface useFormPayloadProps {
     }[]
   ) => void;
   actionProduct: (id: string, action: "plus" | "minus") => void;
+  resetProduct: () => void;
 }
 
 const useFormPayload = create<useFormPayloadProps>((set) => ({
@@ -33,6 +34,11 @@ const useFormPayload = create<useFormPayloadProps>((set) => ({
       }
       return { userProducts: [...userProducts] || [] };
     }),
+
+  resetProduct: () =>
+    set((state) => ({
+      userProducts: state.userProducts.map(({ data }) => ({ data, total: 0 })),
+    })),
 }));
 
 export default useFormPayload;

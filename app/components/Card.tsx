@@ -15,10 +15,12 @@ interface ICard {
 const Card: React.FC<ICard> = ({ data }) => {
   const { actionProduct } = useFormPayload((state) => state);
   const { data: payload, total } = data ?? {};
-  const { name, price, id } = payload ?? {};
+  const { name, price, id, cover } = payload ?? {};
   return (
     <div className="w-[80%] bg-[#1d1d22] h-[150px] rounded-lg p-5 flex items-center gap-x-4 cursor-pointer">
-      <div className="h-full w-1/2 bg-[#26262d] rounded-lg" />
+      <div className="h-full w-1/2 bg-[#26262d] rounded-lg">
+        <img src={cover} alt={name} />
+      </div>
       <div className="flex flex-col h-full">
         <h4 className="text-white font-bold">{name}</h4>
         <p className="text-white text-xs font-light">
