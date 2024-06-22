@@ -16,6 +16,7 @@ import { formatCurrencyIDR } from "@/utils/formatCurrency";
 import { createOrder } from "@/lib/actions";
 import Lottie from "react-lottie";
 import animationData from "@/data/confetti.json";
+import { useOrder } from "@/networks/hooks";
 
 interface ModalDetailOrderProps {
   visible: boolean;
@@ -34,6 +35,8 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
   const { userProducts, resetProduct } = useFormPayload();
   const [userInfo, setUserInfo] = useState(DEFAULT_VALUE);
   const [success, setSuccess] = useState(false);
+
+  const { mutate, isPending } = useOrder();
 
   const calculatedTotal = useMemo(() => {
     const products = userProducts.reduce(
@@ -58,18 +61,15 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
       totalPrice: calculatedTotal,
       orders: userProducts.filter((item) => item.total !== 0),
     };
-    try {
-      const response = await createOrder(payload);
-      if (response?.status === 200) {
+    mutate(payload, {
+      onSuccess: () => {
         setSuccess(true);
         resetProduct();
-        setTimeout(() => toggle(), 2000);
+        setTimeout(() => toggle(), 1000);
         setUserInfo(DEFAULT_VALUE);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }, [calculatedTotal, resetProduct, toggle, userInfo, userProducts]);
+      },
+    });
+  }, [calculatedTotal, mutate, resetProduct, toggle, userInfo, userProducts]);
 
   return (
     <Modal
@@ -77,7 +77,7 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
       onOpenChange={toggle}
       size="sm"
       placement="center"
-      className="relative"
+      isDismissable
     >
       <ModalContent className="relative">
         {(onClose) => (
@@ -139,7 +139,14 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
               <Button color="danger" variant="light" onPress={onClose}>
                 Keluar
               </Button>
-              <Button color="primary" onPress={handleSubmit}>
+              <Button
+                color="primary"
+                onPress={handleSubmit}
+                isLoading={isPending}
+                isDisabled={Object.values(userInfo).some(
+                  (value) => value === ""
+                )}
+              >
                 Pesan
               </Button>
             </ModalFooter>

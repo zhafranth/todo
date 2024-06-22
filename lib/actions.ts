@@ -91,7 +91,6 @@ export const deleteProduct = async (id: string) => {
       },
     });
 
-    revalidatePath("/");
     return { status: 200 };
   } catch (error) {
     return {
@@ -109,7 +108,6 @@ export const createOrder = async (data: {
 }) => {
   try {
     const { name, telp, totalPrice, status, orders } = data;
-    console.log("orders:", orders);
     await prisma.order.create({
       data: {
         name,
@@ -129,5 +127,40 @@ export const createOrder = async (data: {
     return { status: 200 };
   } catch (error) {
     console.log("error:", error);
+  }
+};
+
+export const updateOrderStatus = async ({
+  status,
+  id,
+}: {
+  status: number;
+  id: string;
+}) => {
+  try {
+    await prisma.order.update({
+      where: {
+        id,
+      },
+      data: {
+        status,
+      },
+    });
+    return { status: 200 };
+  } catch (error) {
+    console.log("error:", error);
+  }
+};
+
+export const deleteOrder = async (id: string) => {
+  try {
+    await prisma.order.delete({
+      where: {
+        id,
+      },
+    });
+    return { status: 200 };
+  } catch (error) {
+    console.log(error);
   }
 };

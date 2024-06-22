@@ -1,8 +1,9 @@
 import { formatCurrencyIDR } from "@/utils/formatCurrency";
-import type { Order } from "@prisma/client";
+import type { Order, OrderItem, Product } from "@prisma/client";
 import StatusField from "../components/StatusField";
 import dayjs from "dayjs";
-import { Button } from "@nextui-org/react";
+import DetailOrder from "../components/DetailOrder";
+import DeleteOrder from "../controller/components/DeleteOrder";
 
 export const columns = [
   {
@@ -29,15 +30,24 @@ export const columns = [
     key: "createdAt",
     label: "Created At",
     render: ({ createdAt }: Order) => (
-      <p className="text-white">{dayjs(createdAt).format("DD MMM YYYY")}</p>
+      <p className="text-white">
+        {dayjs(createdAt).format("DD MMM YYYY, HH:mm")}
+      </p>
     ),
   },
   {
     key: "action",
     label: "ACTION",
-    render: ({ id }: Order) => (
-      <div className="flex px-6 gap-x-2 py-3">
-        <Button color="success">Detail Order</Button>
+    render: (
+      data: Order & {
+        orders: (OrderItem & {
+          data: Product;
+        })[];
+      }
+    ) => (
+      <div className="flex gap-x-2">
+        <DetailOrder data={data} />
+        <DeleteOrder id={data.id} />
       </div>
     ),
   },
