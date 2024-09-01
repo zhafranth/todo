@@ -11,7 +11,7 @@ export const getProductList = async () => {
   }
 };
 
-export const getOrderList = async () => {
+export const getOrderList = async (status?: number) => {
   try {
     const orders = await prisma.order.findMany({
       include: {
@@ -20,6 +20,9 @@ export const getOrderList = async () => {
             data: true,
           },
         },
+      },
+      where: {
+        status: status,
       },
     });
     return orders;

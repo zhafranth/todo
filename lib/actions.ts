@@ -108,7 +108,7 @@ export const createOrder = async (data: {
 }) => {
   try {
     const { name, telp, totalPrice, status, orders } = data;
-    await prisma.order.create({
+    const order = await prisma.order.create({
       data: {
         name,
         telp,
@@ -124,7 +124,12 @@ export const createOrder = async (data: {
         },
       },
     });
-    return { status: 200 };
+    return {
+      status: 200,
+      data: {
+        id: order.id,
+      },
+    };
   } catch (error) {
     console.log("error:", error);
   }
@@ -152,6 +157,44 @@ export const updateOrderStatus = async ({
   }
 };
 
+export const updateDataOrder = async ({
+  id,
+  orders,
+  totalPrice,
+}: {
+  id: string;
+  totalPrice: number;
+  orders: { data: { id: string }; total: number }[];
+}) => {
+  try {
+    const order = await prisma.order.update({
+      where: {
+        id,
+      },
+      data: {
+        totalPrice,
+        orders: {
+          create: orders.map((item) => ({
+            total: item.total,
+            data: {
+              connect: { id: item.data.id },
+            },
+          })),
+        },
+      },
+    });
+
+    return {
+      status: 200,
+      data: {
+        id: order.id,
+      },
+    };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const deleteOrder = async (id: string) => {
   try {
     await prisma.order.delete({
@@ -160,6 +203,26 @@ export const deleteOrder = async (id: string) => {
       },
     });
     return { status: 200 };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getDetailOrder = async (id: string) => {
+  try {
+    const order = await prisma.order.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        orders: {
+          include: {
+            data: true,
+          },
+        },
+      },
+    });
+    return order;
   } catch (error) {
     console.log(error);
   }

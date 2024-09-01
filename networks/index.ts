@@ -4,11 +4,13 @@ import {
   updateOrderStatus,
   createOrder,
   deleteOrder,
+  createProduct,
+  getDetailOrder,
 } from "@/lib/actions";
 import { PayloadOrders } from "./payload.interface";
 
-export const getOrders = async () => {
-  const response = await getOrderList();
+export const getOrders = async (status?: number) => {
+  const response = await getOrderList(status);
   return response;
 };
 
@@ -34,5 +36,15 @@ export const postOrder = async (data: PayloadOrders) => {
 
 export const delOrder = async (id: string) => {
   const response = await deleteOrder(id);
+  return response;
+};
+
+export const postProduct = async (data: FormData) => {
+  const response = await createProduct(data);
+  return response;
+};
+
+export const getOrderDetail = async (id: string) => {
+  const response = await getDetailOrder(id);
   return response;
 };

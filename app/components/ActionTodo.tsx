@@ -14,6 +14,7 @@ import { createProduct } from "@/lib/actions";
 import { FaHome, FaPlus } from "react-icons/fa";
 import ImportButton from "./ImportButton";
 import { useRouter } from "next/navigation";
+import { useProduct } from "@/networks/hooks";
 
 const DEFAULT_VALUE: {
   name: string;
@@ -25,6 +26,10 @@ const DEFAULT_VALUE: {
 const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
   const [isShow, setIsShow] = useState(false);
   const [payload, setPayload] = useState(DEFAULT_VALUE);
+
+  const { createProducts } = useProduct();
+  const { mutate, isPending } = createProducts;
+
   const router = useRouter();
 
   const toggleModal = useCallback(
@@ -49,20 +54,19 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
   }, []);
 
   const handleSubmit = useCallback(async () => {
-    try {
-      const data = new FormData();
-      data.set("cover", payload.cover as File);
-      data.set("name", payload.name);
-      data.set("price", payload.price);
-      data.set("description", payload.description);
+    const data = new FormData();
+    data.set("cover", payload.cover as File);
+    data.set("name", payload.name);
+    data.set("price", payload.price);
+    data.set("description", payload.description);
 
-      const response = await createProduct(data);
-      toggleModal();
-      setPayload(DEFAULT_VALUE);
-    } catch (error) {
-      console.log(error);
-    }
-  }, [payload, toggleModal]);
+    mutate(data, {
+      onSuccess: () => {
+        toggleModal();
+        setPayload(DEFAULT_VALUE);
+      },
+    });
+  }, [mutate, payload, toggleModal]);
 
   return (
     <>
@@ -115,7 +119,11 @@ const ActionTodo = ({ type }: { type: "add" | "edit" }) => {
                 <Button color="danger" variant="light" onPress={onClose}>
                   Close
                 </Button>
-                <Button color="primary" onPress={handleSubmit}>
+                <Button
+                  color="primary"
+                  onPress={handleSubmit}
+                  isLoading={isPending}
+                >
                   {type === "add" ? "Tambah" : "Simpan"}
                 </Button>
               </ModalFooter>

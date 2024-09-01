@@ -1,11 +1,12 @@
 "use client";
 
-import { Button } from "@nextui-org/react";
+import { Badge, Button } from "@nextui-org/react";
 import React, { useCallback, useMemo, useState } from "react";
-import { FaArrowRight } from "react-icons/fa";
+import { FaArrowRight, FaShoppingBasket } from "react-icons/fa";
 import ModalDetailOrder from "./ModalDetailOrder";
 import useFormPayload from "./hooks/useFormState";
 import { formatCurrencyIDR } from "@/utils/formatCurrency";
+import MyOrder from "./MyOrder";
 
 const ActionFooter = () => {
   const { userProducts } = useFormPayload();
@@ -21,13 +22,14 @@ const ActionFooter = () => {
   const toggleModal = useCallback(() => setIsShow((prev) => !prev), []);
   return (
     <div className="relative">
-      <div className="fixed bottom-0 left-0 right-0 w-[80%] md:w-[30%] mb-6 z-20 mx-auto h-16 bg-[#2f2f3c] rounded-full flex justify-between items-center px-4 shadow-2xl">
-        <div className="ml-4 text-white">
+      <div className="fixed bottom-0 left-0 right-0 w-[80%] md:w-[30%] mb-6 z-20 mx-auto h-16 bg-[#2f2f3c] rounded-full flex gap-x-2 items-center px-4 shadow-2xl">
+        <div className="ml-4 text-white mr-auto">
           <p className="text-xs font-light">Total</p>
           <h4 className="font-semibold">
             {formatCurrencyIDR(calculatedTotal)}
           </h4>
         </div>
+        <MyOrder />
         <Button
           className="rounded-full"
           startContent={<FaArrowRight />}

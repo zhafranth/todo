@@ -10,13 +10,13 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@nextui-org/react";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useFormPayload from "./hooks/useFormState";
 import { formatCurrencyIDR } from "@/utils/formatCurrency";
-import { createOrder } from "@/lib/actions";
 import Lottie from "react-lottie";
 import animationData from "@/data/confetti.json";
-import { useOrder } from "@/networks/hooks";
+import { useGetOrder, useOrder, useUpdateOrder } from "@/networks/hooks";
+import { orderLocalStorage } from "./hooks/useLocalStorage";
 
 interface ModalDetailOrderProps {
   visible: boolean;
@@ -35,8 +35,16 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
   const { userProducts, resetProduct } = useFormPayload();
   const [userInfo, setUserInfo] = useState(DEFAULT_VALUE);
   const [success, setSuccess] = useState(false);
-
+  const orderId = orderLocalStorage();
   const { mutate, isPending } = useOrder();
+  const { mutate: handleUpdate, isPending: isPendingUpdate } = useUpdateOrder();
+
+  const { data: detailOrder } = useGetOrder(orderId);
+
+  const isUpdate = useMemo(() => {
+    const { status } = detailOrder ?? {};
+    return !detailOrder ? false : status !== 2;
+  }, [detailOrder]);
 
   const calculatedTotal = useMemo(() => {
     const products = userProducts.reduce(
@@ -61,15 +69,51 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
       totalPrice: calculatedTotal,
       orders: userProducts.filter((item) => item.total !== 0),
     };
-    mutate(payload, {
-      onSuccess: () => {
-        setSuccess(true);
-        resetProduct();
-        setTimeout(() => toggle(), 1000);
-        setUserInfo(DEFAULT_VALUE);
-      },
-    });
-  }, [calculatedTotal, mutate, resetProduct, toggle, userInfo, userProducts]);
+    if (isUpdate) {
+      handleUpdate(
+        {
+          id: detailOrder?.id as string,
+          orders: userProducts.filter((item) => item.total !== 0),
+          totalPrice: calculatedTotal + (detailOrder?.totalPrice as number),
+        },
+        {
+          onSuccess: () => {
+            setSuccess(true);
+            resetProduct();
+            setTimeout(() => toggle(), 1000);
+            setUserInfo(DEFAULT_VALUE);
+          },
+        }
+      );
+    } else {
+      mutate(payload, {
+        onSuccess: (data) => {
+          setSuccess(true);
+          resetProduct();
+          setTimeout(() => toggle(), 1000);
+          setUserInfo(DEFAULT_VALUE);
+          localStorage?.setItem("order", JSON.stringify(data?.data));
+        },
+      });
+    }
+  }, [
+    calculatedTotal,
+    detailOrder,
+    handleUpdate,
+    isUpdate,
+    mutate,
+    resetProduct,
+    toggle,
+    userInfo,
+    userProducts,
+  ]);
+
+  useEffect(() => {
+    if (detailOrder) {
+      const { name, telp } = detailOrder ?? {};
+      setUserInfo({ name, telp });
+    }
+  }, [detailOrder]);
 
   return (
     <Modal
@@ -89,13 +133,16 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
               <Input
                 label="Nama"
                 onChange={(e) => handleChange("name", e)}
+                isDisabled={isUpdate}
                 value={userInfo.name}
               />
               <Input
                 label="No. Telepon"
                 onChange={(e) => handleChange("telp", e)}
+                isDisabled={isUpdate}
                 value={userInfo.telp}
               />
+
               <Divider className="my-5" />
               <div className="flex justify-between">
                 <h2 className="text-sm">Detail Pesanan</h2>
@@ -142,7 +189,7 @@ const ModalDetailOrder: React.FC<ModalDetailOrderProps> = ({
               <Button
                 color="primary"
                 onPress={handleSubmit}
-                isLoading={isPending}
+                isLoading={isPending || isPendingUpdate}
                 isDisabled={Object.values(userInfo).some(
                   (value) => value === ""
                 )}
